@@ -37,10 +37,12 @@ build:
      uses: actions/checkout@v4
 
    - name: Build image
-     run: docker build -t secure-demo:${{ github.sha }} .
-          echo "Image built: secure-demo:${{github.sha }}"
+     run: |
+           docker build -t secure-demo:${{ github.sha }} .
+           echo "Image built: secure-demo:${{github.sha }}"
    - name: Smoke test
-     run: docker run --rm --name smoke-test -p 3001:3002 -d secure-demo:{{github.sha }}
-          sleep 3
-          curl -f http://localhost:3001/ || exit 1
-          echo "smoke test passed"
+     run: |
+            docker run --rm --name smoke-test -p 3001:3002 -d secure-demo:{{github.sha }}
+            sleep 3
+            curl -f http://localhost:3001/ || exit 1
+            echo "smoke test passed"
