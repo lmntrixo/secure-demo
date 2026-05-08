@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 3002;
-const DATA_FILE = '/app/data/counter.json'; // persistant
+//const DATA_FILE = '/app/data/counter.json'; // persistant
+const DATA_FILE = process.env.DATA_FILE || './data/counter.json';
 const TEMP_FILE = '/tmp/session.txt'; // temporaire
 
 // Initialise le compteur si le fichier n'exixte pas
@@ -75,3 +76,4 @@ const server = http.createServer((req, res) => {
 	console.log(`server running on port ${PORT}`);
 	console.log(`Running as UID: ${process.getuid()}`);
   });
+  module.exports = server;
