@@ -1,0 +1,23 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3002:3002"
+    volumes:
+      - app-data:/app/data
+    depends_on:
+      - db
+    environment:
+      - NODE ENV=production
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: demodb
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+#declaration des volumes
+volumes:
+  app-data:
+  pg-data:
