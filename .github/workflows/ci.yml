@@ -43,15 +43,15 @@ jobs:
 
      - name: Build and push image
        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/secure-demo:latest -t ${{ secrets.DOCKERHUB_USERNAME }}/secure-demo:${{ github.sha }} .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/secure-demo;latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/secure-demo:${{ github.sha }}
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:latest -t ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:${{ github.sha }} .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:${{ github.sha }}
 
         #Smoke test avec l'image qu'on vient de push
 
      - name: Smoke test
        run: |
-          docker run --rm --name smoke-test -p 3001:3002 -d ${{ secrets.DOCKERHUB_USERNAME }}/secure-demo:${{ github.sha }}
+          docker run --rm --name smoke-test -p 3001:3002 -d ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:${{ github.sha }}
           sleep 3
           curl -f http://localhost:3001/ || exit 1
           echo "Smoke test passed"
