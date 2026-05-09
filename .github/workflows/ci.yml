@@ -49,7 +49,7 @@ jobs:
 
         - name: Build and push image
           env:
-             DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           run: |
              docker build \
                 -t $DOCKERHUB_USERNAME/secure-dem:latest \
