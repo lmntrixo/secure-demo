@@ -25,7 +25,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-  build-and-push:
+   build-and-push:
       name: Build and push Docker image
       runs-on: self-hosted
       needs: test
@@ -59,13 +59,13 @@ jobs:
             docker push $DOCKERHUB_USERNAME/secure-dem:${{ github.sha }}
 
        - name: Smoke test
-         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-         run: |
-          docker run --rm --name smoke-test \
+          env:
+           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          run: |
+           docker run --rm --name smoke-test \
               -p 3001:3002 \
               -d $DOCKERHUB_USERNAME/secure-dem:${{ github.sha }}
-          sleep 3
-          curl -f http://localhost:3001/ || exit 1
-          docker stop smoke-test
-          echo "smoke test passed"
+           sleep 3
+           curl -f http://localhost:3001/ || exit 1
+           docker stop smoke-test
+           echo "smoke test passed"
