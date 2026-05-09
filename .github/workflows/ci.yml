@@ -36,21 +36,21 @@ jobs:
           env:
              DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
              DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-           run: |
+          run: |
              echo "Username: $DOCKERHUB_USERNAME"
              echo "Token length: $DOCKERHUB_TOKEN"
         - name: Login to dockerhub
           env:
              DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
              DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-           run: |
+          run: |
              docker logout || true
              echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
         - name: Build and push image
           env:
              DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-           run: |
+          run: |
              docker build \
                 -t $DOCKERHUB_USERNAME/secure-dem:latest \
                 -t $DOCKERHUB_USERNAME/secure-dem:${{ github.sha }} .
@@ -60,7 +60,7 @@ jobs:
         - name: Smoke test
           env:
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-           run: |
+          run: |
              docker run --rm --name smoke-test \
                -p 3001:3002 \
                -d $DOCKERHUB_USERNAME/secure-dem:${{ github.sha }}
