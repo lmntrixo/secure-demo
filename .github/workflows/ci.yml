@@ -27,22 +27,37 @@ jobs:
         run: npm test
 
 
-  build:
-    name: Build Docker image
+  build-and-push:
+    name: Build & push Docker image
     runs-on: self-hosted
     needs: test               #build ne lance que si test reussi
 
     steps:
      - name: Checkout code
        uses: actions/checkout@v4
+        #Connexion a Docker Hub avec les secrets
+     - name: Login to Docker Hub
+       uses: docker/build-push-actions@v5
+       with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{secrets.DOCKERHUB_TOKEN }}
 
-     - name: Build image
-       run: |
-           docker build -t secure-demo:${{ github.sha }} .
-           echo "Image built: secure-demo:${{github.sha }}"
+        #Build and push en une seule etape
+
+     - name: Build and push image
+       uses: docker/build-push-action@v5
+       with:
+          context: .
+          push: true
+          tags: |
+             ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:latest
+             ${{ secrets.DOCKERHUB_TOKEN }}/secure-dem:${{ github.sha }}
+
+        #Smoke test avec l'image qu'on vient de push
+
      - name: Smoke test
        run: |
-            docker run --rm --name smoke-test -p 3001:3002 -d secure-demo:${{github.sha }}
-            sleep 3
-            curl -f http://localhost:3001/ || exit 1
-            echo "smoke test passed"
+          docker run --rm --name smoke-test -p 3001:3002 -d ${{ secrets.DOCKERHUB_USERNAME }}/secure-demo:${{ github.sha }}
+          sleep 3
+          curl -f http://localhost:3001/ || exit 1
+          echo "Smoke test passed"
