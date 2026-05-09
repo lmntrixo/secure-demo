@@ -61,6 +61,7 @@ jobs:
           env:
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           run: |
+             docker rm -f smoke-test || true
              docker run --rm --name smoke-test \
                -p 3001:3002 \
                -d ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:${{ github.sha }}
