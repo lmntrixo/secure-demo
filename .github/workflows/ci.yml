@@ -7,7 +7,6 @@ on:
     branches: [main]
 
 jobs:
-
   test:
     name: test
     runs-on: self-hosted
@@ -26,48 +25,47 @@ jobs:
       - name: Run tests
         run: npm test
 
-
   build-and-push:
-    name: Build & push Docker image
-    runs-on: self-hosted
-    needs: test               #build ne lance que si test reussi
+      name: Build and push Docker image
+      runs-on: self-hosted
+      needs: test
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-    steps:
-     - name: Checkout code
-       uses: actions/checkout@v4
-        #Connexion a Docker Hub avec les secrets
-     - name: Login to Docker Hub
-       run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "{{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        - name: bebug secrets
+          env:
+            DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          run: |
+            echo "Username: $DOCKERHUB_USERNAME"
+            echo "Token length: $DOCKERHUB_TOKEN"
+        - name: Login to dockerhub
+          env:
+            DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          run: |
+            docker logout || true
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
-        #Build and push en une seule etape
+       - name: Build and push image
+          env:
+            DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          run: |
+            docker build \
+                -t $DOCKERHUB_USERNAME/secure-dem:latest \
+                -t $DOCKERHUB_USERNAME/secure-dem:${{ github.sha }} .
+            docker push $DOCKERHUB_USERNAME/secure-dem:latest
+            docker push $DOCKERHUB_USERNAME/secure-dem:${{ github.sha }}
 
-     - name: Build and push image
-       run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:latest -t ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:${{ github.sha }} .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:${{ github.sha }}
-
-        #Smoke test avec l'image qu'on vient de push
-
-     - name: Smoke test
-       run: |
-          docker run --rm --name smoke-test -p 3001:3002 -d ${{ secrets.DOCKERHUB_USERNAME }}/secure-dem:${{ github.sha }}
+       - name: Smoke test
+         env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+         run: |
+          docker run --rm --name smoke-test \
+              -p 3001:3002 \
+              -d $DOCKERHUB_USERNAME/secure-dem:${{ github.sha }}
           sleep 3
           curl -f http://localhost:3001/ || exit 1
-          echo "Smoke test passed"
-    - name: Debug credentials
-            env:
-              DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-              DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-            run: |
-              echo "Username length: ${#DOCKERHUB_USERNAME}"
-              echo "Token length: ${#DOCKERHUB_TOKEN}"
-              echo "Username value: $DOCKERHUB_USERNAME"
-
-    - name: Login to docker hub
-          env:
-             DOCKERHUN_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-             DOCKERHUB_TOKEN:  ${{ secrets.DOCKERHUB_TOKEN }}
-          run: |
-             docker logout || true
-             echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          docker stop smoke-test
+          echo "smoke test passed"
