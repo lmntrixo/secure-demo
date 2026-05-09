@@ -55,3 +55,19 @@ jobs:
           sleep 3
           curl -f http://localhost:3001/ || exit 1
           echo "Smoke test passed"
+    - name: Debug credentials
+            env:
+              DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+              DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+            run: |
+              echo "Username length: ${#DOCKERHUB_USERNAME}"
+              echo "Token length: ${#DOCKERHUB_TOKEN}"
+              echo "Username value: $DOCKERHUB_USERNAME"
+
+            - name: Login to docker hub
+              env:
+                 DOCKERHUN_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+                 DOCKERHUB_TOKEN:  ${{ secrets.DOCKERHUB_TOKEN }}
+              run: |
+                docker logout || true
+                echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
